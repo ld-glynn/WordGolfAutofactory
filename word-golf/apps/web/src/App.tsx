@@ -58,6 +58,7 @@ export function App() {
   // "medium" avoids crashing puzzle generation on the control path.
   const wordPoolDifficulty = normalizePracticeDifficulty(wordPoolDifficultyRaw);
   const showPoweredByFooter = useFlag(FLAG_KEYS.showPoweredByFooter);
+  const showCaddieReport = useFlag(FLAG_KEYS.showCaddieReport) === "v1";
 
   // Business metric: fire once when the footer is rendered (treatment path).
   // Wrapped in try/catch so a tracking failure can never break the page.
@@ -373,7 +374,7 @@ export function App() {
               Play again
             </button>
           </div>
-          <CaddieReport path={path} target={puzzle.target} />
+          {showCaddieReport && <CaddieReport path={path} target={puzzle.target} />}
         </section>
       ) : (
         <form className="controls" onSubmit={submit}>

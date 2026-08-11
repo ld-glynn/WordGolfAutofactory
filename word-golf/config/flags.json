@@ -89,6 +89,15 @@
       "defaultVariation": 0,
       "hypothesis": "Session replay unlocks LD flag Monitoring and session-level debugging; off by default for input privacy.",
       "watchedMetric": null
+    },
+    {
+      "key": "show-caddie-report",
+      "name": "Show Caddie Report",
+      "kind": "string",
+      "variations": ["control", "v1"],
+      "defaultVariation": 0,
+      "hypothesis": "Post-round move-quality analysis (Caddie Report) increases player engagement and return rate by surfacing actionable feedback after each puzzle.",
+      "watchedMetric": null
     }
   ]
 }

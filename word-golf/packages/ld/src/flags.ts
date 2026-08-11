@@ -15,6 +15,7 @@ export const FLAG_KEYS = {
   enableDifficultyPickerUx: "enable-difficulty-picker-ux",
   showPoweredByFooter: "show-powered-by-footer",
   enableSessionReplay: "enable-session-replay",
+  showCaddieReport: "show-caddie-report",
 } as const;
 
 export type ParAlgorithm = "shortest" | "no-reuse" | "heuristic";
@@ -31,6 +32,8 @@ export interface Flags {
   "enable-difficulty-picker-ux": boolean;
   "show-powered-by-footer": boolean;
   "enable-session-replay": boolean;
+  /** String-multivariate: "control" = panel hidden (existing behavior); "v1" = CaddieReport rendered. */
+  "show-caddie-report": string;
 }
 
 /**
@@ -56,4 +59,7 @@ export const FLAG_DEFAULTS: Flags = {
   // Control path: false → session replay off (privacy default for word-game input).
   // Treatment path: true  → LDRecord.start() records anonymized replays in LD.
   "enable-session-replay": false,
+  // Control path: "control" → CaddieReport panel not rendered (existing behavior).
+  // Treatment path: "v1"     → Post-round move-quality breakdown shown after puzzle completion.
+  "show-caddie-report": "control",
 };
