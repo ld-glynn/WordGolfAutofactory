@@ -33,6 +33,10 @@ export const METRIC_EVENTS = {
    *  rendered (treatment path only). Occurrence metric — higher is better
    *  (business). */
   poweredByFooterViewed: "show-powered-by-footer-viewed",
+  // enable-new-background-color guarded-release events
+  /** Fired once when the green-tinted dark background (#1c3028) is applied
+   *  (treatment path only). Occurrence metric — monitoring visibility only. */
+  newBackgroundColorViewed: "enable-new-background-color-viewed",
 } as const;
 
 export type MetricEvent = (typeof METRIC_EVENTS)[keyof typeof METRIC_EVENTS];

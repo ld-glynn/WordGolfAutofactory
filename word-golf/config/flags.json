@@ -89,6 +89,15 @@
       "defaultVariation": 0,
       "hypothesis": "Session replay unlocks LD flag Monitoring and session-level debugging; off by default for input privacy.",
       "watchedMetric": null
+    },
+    {
+      "key": "enable-new-background-color",
+      "name": "Enable New Background Color",
+      "kind": "string",
+      "variations": ["control", "v1"],
+      "defaultVariation": 0,
+      "hypothesis": "New green-tinted dark background (#1c3028) vs original near-black (#0e1116); null hypothesis (cosmetic -> promote if no engagement drop).",
+      "watchedMetric": null
     }
   ]
 }

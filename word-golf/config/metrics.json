@@ -125,6 +125,15 @@
       "unit": "count",
       "successCriteria": "LowerThanBaseline",
       "description": "Clipboard write failed when sharing a daily result."
+    },
+    {
+      "key": "enable-new-background-color-viewed",
+      "name": "New Background Color Viewed",
+      "category": "business",
+      "kind": "custom",
+      "unit": "count",
+      "successCriteria": "HigherThanBaseline",
+      "description": "The green-tinted dark background (#1c3028) was applied (treatment path only). Monitoring metric for release visibility."
     }
   ]
 }
