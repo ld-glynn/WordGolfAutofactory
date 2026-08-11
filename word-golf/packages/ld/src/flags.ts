@@ -15,6 +15,7 @@ export const FLAG_KEYS = {
   enableDifficultyPickerUx: "enable-difficulty-picker-ux",
   showPoweredByFooter: "show-powered-by-footer",
   enableSessionReplay: "enable-session-replay",
+  enableNewBackgroundColor: "enable-new-background-color",
 } as const;
 
 export type ParAlgorithm = "shortest" | "no-reuse" | "heuristic";
@@ -31,6 +32,9 @@ export interface Flags {
   "enable-difficulty-picker-ux": boolean;
   "show-powered-by-footer": boolean;
   "enable-session-replay": boolean;
+  // Control: "control" → original background (#0e1116).
+  // Treatment: "v1" → new green-tinted dark background (#1c3028).
+  "enable-new-background-color": "control" | "v1";
 }
 
 /**
@@ -56,4 +60,7 @@ export const FLAG_DEFAULTS: Flags = {
   // Control path: false → session replay off (privacy default for word-game input).
   // Treatment path: true  → LDRecord.start() records anonymized replays in LD.
   "enable-session-replay": false,
+  // Control path: "control" → original background color (#0e1116).
+  // Treatment path: "v1"    → new green-tinted dark background (#1c3028).
+  "enable-new-background-color": "control",
 };

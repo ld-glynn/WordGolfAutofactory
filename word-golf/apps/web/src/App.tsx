@@ -56,6 +56,29 @@ export function App() {
   // "medium" avoids crashing puzzle generation on the control path.
   const wordPoolDifficulty = normalizePracticeDifficulty(wordPoolDifficultyRaw);
   const showPoweredByFooter = useFlag(FLAG_KEYS.showPoweredByFooter);
+  // Control path: "control" → original background color (#0e1116, set in styles.css).
+  // Treatment path: "v1"    → new green-tinted dark background (#1c3028).
+  const newBackgroundColor = useFlag(FLAG_KEYS.enableNewBackgroundColor);
+
+  // Apply the background-color CSS variable at the :root level when the flag
+  // is in the treatment variation. Resets to the stylesheet default on cleanup
+  // or when the flag flips back to control, so the control path is always the
+  // static styles.css value — no code runs for the off variation.
+  useEffect(() => {
+    if (newBackgroundColor === "v1") {
+      document.documentElement.style.setProperty("--bg", "#1c3028");
+      // Monitoring metric: record that the treatment background was applied.
+      // Wrapped in try/catch so a tracking failure can never break the page.
+      try {
+        track(METRIC_EVENTS.newBackgroundColorViewed);
+      } catch {
+        // intentionally swallowed — telemetry must not affect rendering
+      }
+      return () => {
+        document.documentElement.style.removeProperty("--bg");
+      };
+    }
+  }, [newBackgroundColor, track]);
 
   // Business metric: fire once when the footer is rendered (treatment path).
   // Wrapped in try/catch so a tracking failure can never break the page.
