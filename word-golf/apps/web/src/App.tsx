@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useMemo,
   useRef,
   useState,
   type FormEvent,
@@ -560,26 +561,41 @@ const QUALITY_COPY: Record<MoveQuality, string> = {
  */
 function CaddieReport({ path, target }: { path: string[]; target: string }) {
   const track = useTrack();
-  let round;
-  try {
-    round = analyzeRound(path, target, graph);
-  } catch {
+  const { round, failed } = useMemo(() => {
+    try {
+      return { round: analyzeRound(path, target, graph), failed: false };
+    } catch {
+      return { round: null, failed: true };
+    }
+  }, [path, target]);
+  const visible = round !== null && round.moves.length > 0;
+
+  // Metrics fire from effects, never the render body: React may invoke the
+  // component function any number of times per displayed panel (StrictMode
+  // double-invocation, concurrent re-renders), which would emit phantom
+  // events and skew the guarded-release signal. Same pattern as
+  // poweredByFooterViewed above; try/catch so telemetry can never break UI.
+  useEffect(() => {
+    if (!failed) return;
     // Error metric: unexpected failure in move analysis engine.
     try {
       track(METRIC_EVENTS.caddieReportError);
     } catch {
       // intentionally swallowed — telemetry must not affect rendering
     }
-    return null;
-  }
-  if (round.moves.length === 0) return null;
+  }, [failed, track]);
+  useEffect(() => {
+    if (!visible) return;
+    // Business metric: caddie panel successfully rendered (treatment path only).
+    try {
+      track(METRIC_EVENTS.caddieReportViewed);
+    } catch {
+      // intentionally swallowed — telemetry must not affect rendering
+    }
+  }, [visible, track]);
+
+  if (round === null || round.moves.length === 0) return null;
   const pct = Math.round(round.accuracy * 100);
-  // Business metric: caddie panel successfully rendered (treatment path only).
-  try {
-    track(METRIC_EVENTS.caddieReportViewed);
-  } catch {
-    // intentionally swallowed — telemetry must not affect rendering
-  }
   return (
     <section className="caddie" aria-labelledby="caddie-heading">
       <h3 id="caddie-heading">Caddie report</h3>

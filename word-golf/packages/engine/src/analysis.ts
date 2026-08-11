@@ -88,6 +88,11 @@ export function analyzeRound(
     let quality: MoveQuality;
     if (after === undefined) {
       quality = "hazard";
+    // `before === undefined` means `from` sits outside the target's reachable
+    // component. Game-validated paths never produce this (validateMove keeps
+    // play inside the graph, and any word adjacent to a labeled word is itself
+    // labeled by the BFS), so the branch only fires for hand-built paths; a
+    // step that re-enters the labeled component is credited as fairway.
     } else if (before === undefined || after < before) {
       quality = "fairway";
     } else if (after === before) {
