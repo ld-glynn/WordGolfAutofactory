@@ -552,11 +552,34 @@ const QUALITY_COPY: Record<MoveQuality, string> = {
  * Post-round move-by-move breakdown. Each move is classified by whether it
  * shortened the optimal route to the target (fairway), held distance (rough),
  * or lost ground (hazard) — computed by the engine's analyzeRound.
+ *
+ * Emits two guarded-release metrics:
+ *   • "show-caddie-report-viewed"  — occurrence on successful render (business/monitoring).
+ *   • "show-caddie-report-error"   — occurrence when analyzeRound throws (error/killswitch).
+ * Both are wrapped in try/catch so telemetry failures can never break the panel.
  */
 function CaddieReport({ path, target }: { path: string[]; target: string }) {
-  const round = analyzeRound(path, target, graph);
+  const track = useTrack();
+  let round;
+  try {
+    round = analyzeRound(path, target, graph);
+  } catch {
+    // Error metric: unexpected failure in move analysis engine.
+    try {
+      track(METRIC_EVENTS.caddieReportError);
+    } catch {
+      // intentionally swallowed — telemetry must not affect rendering
+    }
+    return null;
+  }
   if (round.moves.length === 0) return null;
   const pct = Math.round(round.accuracy * 100);
+  // Business metric: caddie panel successfully rendered (treatment path only).
+  try {
+    track(METRIC_EVENTS.caddieReportViewed);
+  } catch {
+    // intentionally swallowed — telemetry must not affect rendering
+  }
   return (
     <section className="caddie" aria-labelledby="caddie-heading">
       <h3 id="caddie-heading">Caddie report</h3>

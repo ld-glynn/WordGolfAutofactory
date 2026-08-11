@@ -33,6 +33,15 @@ export const METRIC_EVENTS = {
    *  rendered (treatment path only). Occurrence metric — higher is better
    *  (business). */
   poweredByFooterViewed: "show-powered-by-footer-viewed",
+  // show-caddie-report guarded-release events
+  /** Fired once per post-round view when the CaddieReport panel is rendered
+   *  (treatment path, v1, only). Occurrence metric — higher is better
+   *  (business/monitoring). */
+  caddieReportViewed: "show-caddie-report-viewed",
+  /** Fired when analyzeRound throws unexpectedly inside CaddieReport (both
+   *  treatment and control paths defensively, though only treatment reaches
+   *  this branch). Occurrence metric — lower is better (error/killswitch). */
+  caddieReportError: "show-caddie-report-error",
 } as const;
 
 export type MetricEvent = (typeof METRIC_EVENTS)[keyof typeof METRIC_EVENTS];

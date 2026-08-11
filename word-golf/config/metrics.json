@@ -125,6 +125,24 @@
       "unit": "count",
       "successCriteria": "LowerThanBaseline",
       "description": "Clipboard write failed when sharing a daily result."
+    },
+    {
+      "key": "show-caddie-report-viewed",
+      "name": "Caddie Report Viewed",
+      "category": "business",
+      "kind": "custom",
+      "unit": "count",
+      "successCriteria": "HigherThanBaseline",
+      "description": "The CaddieReport post-round panel was successfully rendered (treatment v1 path only)."
+    },
+    {
+      "key": "show-caddie-report-error",
+      "name": "Caddie Report Analysis Error",
+      "category": "error",
+      "kind": "custom",
+      "unit": "count",
+      "successCriteria": "LowerThanBaseline",
+      "description": "analyzeRound threw unexpectedly inside the CaddieReport component (error/killswitch)."
     }
   ]
 }
