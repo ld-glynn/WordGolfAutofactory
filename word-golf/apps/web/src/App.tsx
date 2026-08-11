@@ -5,6 +5,7 @@ import {
   type FormEvent,
 } from "react";
 import {
+  analyzeRound,
   makeDailyPuzzle,
   makePracticePuzzle,
   neighbors,
@@ -14,6 +15,7 @@ import {
   utcDateString,
   validateMove,
   WORD_LENGTH,
+  type MoveQuality,
   type MoveRejection,
   type PracticeDifficulty,
   type Puzzle,
@@ -371,6 +373,7 @@ export function App() {
               Play again
             </button>
           </div>
+          <CaddieReport path={path} target={puzzle.target} />
         </section>
       ) : (
         <form className="controls" onSubmit={submit}>
@@ -536,6 +539,40 @@ function firstStepToward(
     frontier = next;
   }
   return null;
+}
+
+const QUALITY_COPY: Record<MoveQuality, string> = {
+  fairway: "Fairway",
+  rough: "Rough",
+  hazard: "Hazard",
+};
+
+/**
+ * Post-round move-by-move breakdown. Each move is classified by whether it
+ * shortened the optimal route to the target (fairway), held distance (rough),
+ * or lost ground (hazard) — computed by the engine's analyzeRound.
+ */
+function CaddieReport({ path, target }: { path: string[]; target: string }) {
+  const round = analyzeRound(path, target, graph);
+  if (round.moves.length === 0) return null;
+  const pct = Math.round(round.accuracy * 100);
+  return (
+    <section className="caddie" aria-labelledby="caddie-heading">
+      <h3 id="caddie-heading">Caddie report</h3>
+      <p className="caddie-summary">
+        {round.onLine} of {round.moves.length} move
+        {round.moves.length === 1 ? "" : "s"} on line — {pct}% accuracy
+      </p>
+      <ol className="caddie-moves">
+        {round.moves.map((m, i) => (
+          <li key={`${m.to}-${i}`} className={`caddie-move caddie-${m.quality}`}>
+            <span className="caddie-word">{m.to}</span>
+            <span className="caddie-quality">{QUALITY_COPY[m.quality]}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
 }
 
 function WordChip({
