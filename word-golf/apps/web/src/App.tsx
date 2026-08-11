@@ -21,7 +21,15 @@ import {
   PRACTICE_DIFFICULTIES,
 } from "@word-golf/engine";
 import { FLAG_KEYS, METRIC_EVENTS, useFlag, useTrack } from "@word-golf/ld";
-import { graph, practicePools, startPool, targetPool } from "./words.js";
+import {
+  graph,
+  practicePoolsForWordSet,
+  startPool,
+  targetPool,
+  WORD_SET_LABELS,
+  WORD_SETS,
+  type WordSet,
+} from "./words.js";
 
 const PRACTICE_DIFFICULTY_LEVELS = PRACTICE_DIFFICULTIES;
 
@@ -73,6 +81,7 @@ export function App() {
       enableDifficultyPickerUx ? null : wordPoolDifficulty
     );
   const [difficultyNeedsPick, setDifficultyNeedsPick] = useState(false);
+  const [wordSet, setWordSet] = useState<WordSet>("wordles");
 
   // Control path: sync practiceDifficulty from word-pool-difficulty flag.
   // Treatment path: when the flag turns on (e.g. after LD hydration), clear any
@@ -208,13 +217,15 @@ export function App() {
     completedRef.current = false;
   }
 
-  function newRandomPuzzle(difficulty: PracticeDifficulty) {
+  function newRandomPuzzle(
+    difficulty: PracticeDifficulty,
+    nextWordSet: WordSet = wordSet
+  ) {
     const level = normalizePracticeDifficulty(difficulty);
-    const pools = practicePools(level);
+    const pools = practicePoolsForWordSet(nextWordSet, level);
     const genStart = Date.now();
     try {
       const puzzle = makePracticePuzzle({
-        difficulty: level,
         graph,
         steps: 6,
         ...pools,
@@ -223,14 +234,16 @@ export function App() {
       try {
         track(METRIC_EVENTS.practicePuzzleGenerationMs, {
           value: Date.now() - genStart,
-          data: { difficulty },
+          data: { difficulty, wordSet: nextWordSet },
         });
       } catch {
         // telemetry must not affect gameplay
       }
       // Business: practice puzzle successfully started.
       try {
-        track(METRIC_EVENTS.practicePuzzleStarted, { data: { difficulty } });
+        track(METRIC_EVENTS.practicePuzzleStarted, {
+          data: { difficulty, wordSet: nextWordSet },
+        });
       } catch {
         // telemetry must not affect gameplay
       }
@@ -238,13 +251,15 @@ export function App() {
     } catch {
       // Error: puzzle generation failed — show feedback instead of crashing.
       try {
-        track(METRIC_EVENTS.practicePuzzleError, { data: { difficulty } });
+        track(METRIC_EVENTS.practicePuzzleError, {
+          data: { difficulty, wordSet: nextWordSet },
+        });
       } catch {
         // telemetry must not affect gameplay
       }
       setFeedback({
         kind: "error",
-        text: "Couldn't generate a puzzle — try again or pick another difficulty.",
+        text: "Couldn't generate a puzzle — try again or pick another word set.",
       });
     }
   }
@@ -272,6 +287,12 @@ export function App() {
       // Control: same as original onClick inline handler.
       if (!isDaily) newRandomPuzzle(level);
     }
+  }
+
+  function onWordSetPick(next: WordSet) {
+    setWordSet(next);
+    const level = practiceDifficulty ?? wordPoolDifficulty;
+    newRandomPuzzle(level, next);
   }
 
   function backToDaily() {
@@ -327,13 +348,16 @@ export function App() {
         <Stat label="Moves" value={String(moves)} />
         <Stat label="Par" value={puzzle.par === null ? "\u2014" : String(puzzle.par)} />
         <Stat
-          label={enableRandomPuzzle && !isDaily ? "Practice" : "Daily"}
+          label={!isDaily ? "Practice" : "Daily"}
           value={
-            enableRandomPuzzle && !isDaily && practiceDifficulty
+            !isDaily && practiceDifficulty
               ? practiceDifficulty.charAt(0).toUpperCase() + practiceDifficulty.slice(1)
               : today
           }
         />
+        {!isDaily && (
+          <Stat label="Word set" value={WORD_SET_LABELS[wordSet]} />
+        )}
       </section>
 
       <ol className="track" aria-label="Move history">
@@ -408,11 +432,11 @@ export function App() {
         </p>
       )}
 
-      {enableRandomPuzzle && (
-        <section className="puzzle-actions" aria-labelledby="try-another-heading">
-          <h2 id="try-another-heading" className="puzzle-actions-heading">
-            Try another puzzle?
-          </h2>
+      <section className="puzzle-actions" aria-labelledby="try-another-heading">
+        <h2 id="try-another-heading" className="puzzle-actions-heading">
+          Try another puzzle?
+        </h2>
+        {enableRandomPuzzle && (
           <div className="puzzle-actions-row">
             <button type="button" onClick={onRandomPuzzleClick}>
               Random puzzle
@@ -435,13 +459,35 @@ export function App() {
               ))}
             </div>
           </div>
-          {!isDaily && (
-            <button type="button" className="link" onClick={backToDaily}>
-              Back to today's daily
-            </button>
-          )}
-        </section>
-      )}
+        )}
+        <div className="puzzle-actions-row">
+          <span className="puzzle-actions-label" id="word-set-label">
+            Word set
+          </span>
+          <div
+            className="difficulty-picker"
+            role="group"
+            aria-labelledby="word-set-label"
+          >
+            {WORD_SETS.map((set) => (
+              <button
+                key={set}
+                type="button"
+                className={wordSet === set ? "active" : ""}
+                aria-pressed={wordSet === set}
+                onClick={() => onWordSetPick(set)}
+              >
+                {WORD_SET_LABELS[set]}
+              </button>
+            ))}
+          </div>
+        </div>
+        {!isDaily && (
+          <button type="button" className="link" onClick={backToDaily}>
+            Back to today's daily
+          </button>
+        )}
+      </section>
 
       {showPoweredByFooter && (
         <footer className="powered-by">
