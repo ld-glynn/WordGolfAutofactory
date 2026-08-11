@@ -259,6 +259,11 @@ button:disabled {
   gap: 12px;
 }
 
+.puzzle-actions-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
 .difficulty-picker {
   display: flex;
   gap: 6px;
