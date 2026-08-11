@@ -1,10 +1,12 @@
 import {
   useEffect,
+  useMemo,
   useRef,
   useState,
   type FormEvent,
 } from "react";
 import {
+  analyzeRound,
   makeDailyPuzzle,
   makePracticePuzzle,
   neighbors,
@@ -14,6 +16,7 @@ import {
   utcDateString,
   validateMove,
   WORD_LENGTH,
+  type MoveQuality,
   type MoveRejection,
   type PracticeDifficulty,
   type Puzzle,
@@ -56,6 +59,7 @@ export function App() {
   // "medium" avoids crashing puzzle generation on the control path.
   const wordPoolDifficulty = normalizePracticeDifficulty(wordPoolDifficultyRaw);
   const showPoweredByFooter = useFlag(FLAG_KEYS.showPoweredByFooter);
+  const showCaddieReport = useFlag(FLAG_KEYS.showCaddieReport) === "v1";
 
   // Business metric: fire once when the footer is rendered (treatment path).
   // Wrapped in try/catch so a tracking failure can never break the page.
@@ -371,6 +375,7 @@ export function App() {
               Play again
             </button>
           </div>
+          {showCaddieReport && <CaddieReport path={path} target={puzzle.target} />}
         </section>
       ) : (
         <form className="controls" onSubmit={submit}>
@@ -536,6 +541,78 @@ function firstStepToward(
     frontier = next;
   }
   return null;
+}
+
+const QUALITY_COPY: Record<MoveQuality, string> = {
+  fairway: "Fairway",
+  rough: "Rough",
+  hazard: "Hazard",
+};
+
+/**
+ * Post-round move-by-move breakdown. Each move is classified by whether it
+ * shortened the optimal route to the target (fairway), held distance (rough),
+ * or lost ground (hazard) — computed by the engine's analyzeRound.
+ *
+ * Emits two guarded-release metrics:
+ *   • "show-caddie-report-viewed"  — occurrence on successful render (business/monitoring).
+ *   • "show-caddie-report-error"   — occurrence when analyzeRound throws (error/killswitch).
+ * Both are wrapped in try/catch so telemetry failures can never break the panel.
+ */
+function CaddieReport({ path, target }: { path: string[]; target: string }) {
+  const track = useTrack();
+  const { round, failed } = useMemo(() => {
+    try {
+      return { round: analyzeRound(path, target, graph), failed: false };
+    } catch {
+      return { round: null, failed: true };
+    }
+  }, [path, target]);
+  const visible = round !== null && round.moves.length > 0;
+
+  // Metrics fire from effects, never the render body: React may invoke the
+  // component function any number of times per displayed panel (StrictMode
+  // double-invocation, concurrent re-renders), which would emit phantom
+  // events and skew the guarded-release signal. Same pattern as
+  // poweredByFooterViewed above; try/catch so telemetry can never break UI.
+  useEffect(() => {
+    if (!failed) return;
+    // Error metric: unexpected failure in move analysis engine.
+    try {
+      track(METRIC_EVENTS.caddieReportError);
+    } catch {
+      // intentionally swallowed — telemetry must not affect rendering
+    }
+  }, [failed, track]);
+  useEffect(() => {
+    if (!visible) return;
+    // Business metric: caddie panel successfully rendered (treatment path only).
+    try {
+      track(METRIC_EVENTS.caddieReportViewed);
+    } catch {
+      // intentionally swallowed — telemetry must not affect rendering
+    }
+  }, [visible, track]);
+
+  if (round === null || round.moves.length === 0) return null;
+  const pct = Math.round(round.accuracy * 100);
+  return (
+    <section className="caddie" aria-labelledby="caddie-heading">
+      <h3 id="caddie-heading">Caddie report</h3>
+      <p className="caddie-summary">
+        {round.onLine} of {round.moves.length} move
+        {round.moves.length === 1 ? "" : "s"} on line — {pct}% accuracy
+      </p>
+      <ol className="caddie-moves">
+        {round.moves.map((m, i) => (
+          <li key={`${m.to}-${i}`} className={`caddie-move caddie-${m.quality}`}>
+            <span className="caddie-word">{m.to}</span>
+            <span className="caddie-quality">{QUALITY_COPY[m.quality]}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
 }
 
 function WordChip({

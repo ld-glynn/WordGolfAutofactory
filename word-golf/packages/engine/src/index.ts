@@ -18,6 +18,13 @@ export {
 } from "./pools.js";
 export { buildWordGraph, neighbors, isValidWord } from "./graph.js";
 export { bfsPar } from "./par.js";
+export {
+  analyzeRound,
+  distancesToTarget,
+  type MoveAnalysis,
+  type MoveQuality,
+  type RoundAnalysis,
+} from "./analysis.js";
 export { validateMove, letterDiff } from "./move.js";
 export { relativeToPar, scoreLabel } from "./score.js";
 export {
