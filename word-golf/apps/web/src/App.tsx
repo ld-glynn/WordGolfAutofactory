@@ -332,9 +332,8 @@ export function App() {
       <header className="header">
         <h1>Word Golf</h1>
         <p className="tagline">
-          Turn the starting word into the target word, one letter at a time.
-          Every step must be a real word — anything else reverts to the last
-          good word.
+          Reach the target word in the fewest strokes. One letter per move, and
+          every step must be a real word.
         </p>
       </header>
 
