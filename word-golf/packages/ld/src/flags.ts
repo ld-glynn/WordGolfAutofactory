@@ -16,6 +16,9 @@ export const FLAG_KEYS = {
   showPoweredByFooter: "show-powered-by-footer",
   enableSessionReplay: "enable-session-replay",
   enableNewBackgroundColor: "enable-new-background-color",
+  // Experiment: opaque multivariate payload — branch on served variation index,
+  // not the raw value. Control index 0 renders the original tagline.
+  vcSandboxTaglineTest: "vc-sandbox-tagline-test",
 } as const;
 
 export type ParAlgorithm = "shortest" | "no-reuse" | "heuristic";

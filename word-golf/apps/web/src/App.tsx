@@ -20,7 +20,13 @@ import {
   type WordGraph,
   PRACTICE_DIFFICULTIES,
 } from "@word-golf/engine";
-import { FLAG_KEYS, METRIC_EVENTS, useFlag, useTrack } from "@word-golf/ld";
+import {
+  FLAG_KEYS,
+  METRIC_EVENTS,
+  useFlag,
+  useTrack,
+  useVariationIndex,
+} from "@word-golf/ld";
 import { graph, practicePools, startPool, targetPool } from "./words.js";
 
 const PRACTICE_DIFFICULTY_LEVELS = PRACTICE_DIFFICULTIES;
@@ -40,6 +46,8 @@ interface Feedback {
 export function App() {
   const today = utcDateString();
   const track = useTrack();
+  // vc-sandbox-tagline-test: branch on the served variation index (0 = control).
+  const taglineVariationIndex = useVariationIndex(FLAG_KEYS.vcSandboxTaglineTest);
   const showMissionControl = useFlag(FLAG_KEYS.showMissionControl);
   const enableRandomPuzzle = useFlag(FLAG_KEYS.enableRandomPuzzle);
   const showHintButton = useFlag(FLAG_KEYS.hintButton);
@@ -59,6 +67,19 @@ export function App() {
   // Control path: "control" → original background color (#0e1116, set in styles.css).
   // Treatment path: "v1"    → new green-tinted dark background (#1c3028).
   const newBackgroundColor = useFlag(FLAG_KEYS.enableNewBackgroundColor);
+
+  // vc-sandbox-tagline-test: fire once when the tagline renders so the
+  // guarded release can compare impression rates between control and treatment.
+  // Emits on BOTH paths (index 0 and 1) so the release has two-armed data.
+  // Wrapped in try/catch so a tracking failure can never break the page.
+  useEffect(() => {
+    try {
+      track(METRIC_EVENTS.taglineViewed);
+    } catch {
+      // intentionally swallowed — telemetry must not affect rendering
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // mount-only: one impression per page load
 
   // Apply the background-color CSS variable at the :root level when the flag
   // is in the treatment variation. Resets to the stylesheet default on cleanup
@@ -332,9 +353,9 @@ export function App() {
       <header className="header">
         <h1>Word Golf</h1>
         <p className="tagline">
-          Turn the starting word into the target word, one letter at a time.
-          Every step must be a real word — anything else reverts to the last
-          good word.
+          {taglineVariationIndex === 1
+            ? "Reach the target word in the fewest strokes. One letter per move, and every step must be a real word."
+            : "Turn the starting word into the target word, one letter at a time. Every step must be a real word — anything else reverts to the last good word."}
         </p>
       </header>
 

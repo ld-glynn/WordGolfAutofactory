@@ -134,6 +134,24 @@
       "unit": "count",
       "successCriteria": "HigherThanBaseline",
       "description": "The green-tinted dark background (#1c3028) was applied (treatment path only). Monitoring metric for release visibility."
+    },
+    {
+      "key": "vc-sandbox-tagline-test-tagline-viewed",
+      "name": "VC Sandbox Tagline Test — Tagline Viewed",
+      "category": "business",
+      "kind": "custom",
+      "unit": "count",
+      "successCriteria": "HigherThanBaseline",
+      "description": "Fires once on page load for every user (control index 0 and treatment index 1). Compares tagline impression counts between the two variations. Monitoring metric for exposure verification."
+    },
+    {
+      "key": "vc-sandbox-tagline-test-puzzle-completed",
+      "name": "VC Sandbox Tagline Test — Puzzle Completed",
+      "category": "business",
+      "kind": "custom",
+      "unit": "count",
+      "successCriteria": "HigherThanBaseline",
+      "description": "Reuses the global puzzle_completed event. Compares puzzle completion rate between the punchier tagline (index 1) and the original tagline (index 0). Primary conversion guardrail for the tagline A/B test."
     }
   ]
 }
