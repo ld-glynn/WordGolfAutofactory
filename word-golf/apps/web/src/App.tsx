@@ -68,6 +68,19 @@ export function App() {
   // Treatment path: "v1"    → new green-tinted dark background (#1c3028).
   const newBackgroundColor = useFlag(FLAG_KEYS.enableNewBackgroundColor);
 
+  // vc-sandbox-tagline-test: fire once when the tagline renders so the
+  // guarded release can compare impression rates between control and treatment.
+  // Emits on BOTH paths (index 0 and 1) so the release has two-armed data.
+  // Wrapped in try/catch so a tracking failure can never break the page.
+  useEffect(() => {
+    try {
+      track(METRIC_EVENTS.taglineViewed);
+    } catch {
+      // intentionally swallowed — telemetry must not affect rendering
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // mount-only: one impression per page load
+
   // Apply the background-color CSS variable at the :root level when the flag
   // is in the treatment variation. Resets to the stylesheet default on cleanup
   // or when the flag flips back to control, so the control path is always the

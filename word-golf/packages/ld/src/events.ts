@@ -37,6 +37,11 @@ export const METRIC_EVENTS = {
   /** Fired once when the green-tinted dark background (#1c3028) is applied
    *  (treatment path only). Occurrence metric — monitoring visibility only. */
   newBackgroundColorViewed: "enable-new-background-color-viewed",
+  // vc-sandbox-tagline-test guarded-release events
+  /** Fired once on mount for every user — both control (index 0) and treatment
+   *  (index 1). Compares tagline impression counts between variations.
+   *  Occurrence metric — monitoring visibility. */
+  taglineViewed: "vc-sandbox-tagline-test-tagline-viewed",
 } as const;
 
 export type MetricEvent = (typeof METRIC_EVENTS)[keyof typeof METRIC_EVENTS];

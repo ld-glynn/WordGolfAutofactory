@@ -98,6 +98,15 @@
       "defaultVariation": 0,
       "hypothesis": "New green-tinted dark background (#1c3028) vs original near-black (#0e1116); null hypothesis (cosmetic -> promote if no engagement drop).",
       "watchedMetric": null
+    },
+    {
+      "key": "vc-sandbox-tagline-test",
+      "name": "VC Sandbox Tagline Test",
+      "kind": "json",
+      "variations": ["Control (original tagline)", "Punchier tagline"],
+      "defaultVariation": 0,
+      "hypothesis": "Punchier copy ('Reach the target word in the fewest strokes…') converts more visitors to puzzle completions than the original descriptive tagline.",
+      "watchedMetric": "vc-sandbox-tagline-test-puzzle-completed"
     }
   ]
 }
