@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.2",
+  "flagKey": "vc-sandbox-tagline-test",
+  "scope": "frontend",
+  "releasePlan": {
+    "randomizationUnit": "user",
+    "notes": "Flag is a VC-created multivariate experiment with opaque JSON payloads. The PR gates the alternate tagline (punchier copy) behind variation index 1 (the 'Punchier tagline' variation). Control is variation index 0 (original copy). Neither variation is released in production. Code wired via useVariationIndex hook — falls back to 0 (control) when LD client is not connected."
+  },
+  "releaseIntent": {
+    "_instructions": "Human approver: edit freely. action: auto (release on deploy) | hold (do not release yet) | manual (a human runs the release). Structured fields execute; anything else goes in notes (an agent will structure it on the PR for your review). Blank fields = default auto-release on deploy. prerequisites: [{\"flagKey\": \"flag-xyz\", \"variation\": \"on\"}]. notBefore: YYYY-MM-DD. reference: ticket/doc URL.",
+    "action": "auto",
+    "notBefore": "",
+    "segments": [],
+    "prerequisites": [],
+    "releaseWith": [],
+    "reference": "",
+    "approvedBy": "",
+    "notes": ""
+  }
+}
