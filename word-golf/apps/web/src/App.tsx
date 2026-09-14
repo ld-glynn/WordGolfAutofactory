@@ -20,7 +20,13 @@ import {
   type WordGraph,
   PRACTICE_DIFFICULTIES,
 } from "@word-golf/engine";
-import { FLAG_KEYS, METRIC_EVENTS, useFlag, useTrack } from "@word-golf/ld";
+import {
+  FLAG_KEYS,
+  METRIC_EVENTS,
+  useFlag,
+  useTrack,
+  useVariationIndex,
+} from "@word-golf/ld";
 import { graph, practicePools, startPool, targetPool } from "./words.js";
 
 const PRACTICE_DIFFICULTY_LEVELS = PRACTICE_DIFFICULTIES;
@@ -40,6 +46,8 @@ interface Feedback {
 export function App() {
   const today = utcDateString();
   const track = useTrack();
+  // vc-sandbox-tagline-test: branch on the served variation index (0 = control).
+  const taglineVariationIndex = useVariationIndex(FLAG_KEYS.vcSandboxTaglineTest);
   const showMissionControl = useFlag(FLAG_KEYS.showMissionControl);
   const enableRandomPuzzle = useFlag(FLAG_KEYS.enableRandomPuzzle);
   const showHintButton = useFlag(FLAG_KEYS.hintButton);
@@ -332,9 +340,9 @@ export function App() {
       <header className="header">
         <h1>Word Golf</h1>
         <p className="tagline">
-          Turn the starting word into the target word, one letter at a time.
-          Every step must be a real word — anything else reverts to the last
-          good word.
+          {taglineVariationIndex === 1
+            ? "Reach the target word in the fewest strokes. One letter per move, and every step must be a real word."
+            : "Turn the starting word into the target word, one letter at a time. Every step must be a real word — anything else reverts to the last good word."}
         </p>
       </header>
 
